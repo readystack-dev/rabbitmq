@@ -1,0 +1,332 @@
+{
+ "schema": "readystack.recipe.v1",
+ "slug": "rabbitmq",
+ "tag": "4.4.1-CE-ubuntu24.04-r2",
+ "tarball": "ReadyStack-rabbitmq-4.4.1-CE-ubuntu24.04-r2.tar.gz",
+ "tarball_sha256": "643009c4b0fc6482b69a6728fa2f6dd87058b5fcbeb21d762dd36e5e30e4e502",
+ "kit_root": "4.4.1-CE-ubuntu24.04-r2",
+ "generated_at": "2026-11-20T15:19:43Z",
+ "generator": "KitForge release/recipe_publish.py",
+ "dockerfile": "Dockerfile.offline.pinned",
+ "build_script": "BUILD_OFFLINE.sh",
+ "preview_lines": 24,
+ "pins": {
+  "upstream": {
+   "repo": "https://github.com/rabbitmq/rabbitmq-server",
+   "ref": "v4.4.1",
+   "commit": "aa914c53d2f40f4be3d3a8738d0d5018ea1537e4",
+   "url": "https://github.com/rabbitmq/rabbitmq-server/tree/aa914c53d2f40f4be3d3a8738d0d5018ea1537e4",
+   "from": "docs/provenance/BUILD_RECIPE.json"
+  },
+  "fetches": [
+   {
+    "kind": "git",
+    "url": "https://github.com/rabbitmq/rabbitmq-server",
+    "ref": "v4.4.1"
+   },
+   {
+    "kind": "http",
+    "url": "https://github.com/canonical/chisel/releases/download/v1.5.1/chisel_v1.5.1_linux_amd64.tar.gz"
+   },
+   {
+    "kind": "http",
+    "url": "https://github.com/canonical/chisel-releases/archive/f2600d3aa90123db6d44bb1441a99afc8b5847d9.tar.gz"
+   },
+   {
+    "kind": "http",
+    "url": "https://github.com/erlang/otp/releases/download/OTP-28.5.0.8/otp_src_28.5.0.8.tar.gz"
+   },
+   {
+    "kind": "http",
+    "url": "https://github.com/elixir-lang/elixir/archive/v1.20.4.tar.gz"
+   }
+  ],
+  "bases": [
+   {
+    "ref": "golang:1.27.3-bookworm@sha256:972b4110ba0f47539a975c31e52c64765e1ff19f2d74469ae4a595c6676e80a5",
+    "image": "golang:1.27.3-bookworm",
+    "digest": "sha256:972b4110ba0f47539a975c31e52c64765e1ff19f2d74469ae4a595c6676e80a5"
+   },
+   {
+    "ref": "ubuntu:24.04@sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289",
+    "image": "ubuntu:24.04",
+    "digest": "sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289"
+   }
+  ],
+  "toolchain": {
+   "buildkit": "moby/buildkit:v0.31.2",
+   "buildkit_image_digest": "sha256:e0e67ea9c4bb07bdef683e29f70f3b623d1eb9c82274a9ec04e6bb0511449fb0",
+   "builder_images": [
+    "elixir:1.20-otp-28-slim@sha256:a61672ebbafaf93ec6baeee14657fa73407e4f7fe57e92b2e3f063d25d0d3244",
+    "ubuntu:24.04@sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289"
+   ]
+  },
+  "build_method": "source-rebuild-erlang",
+  "source_date_epoch": 1795161207,
+  "source_date_epoch_utc": "2026-11-20T07:53:27Z",
+  "target": {
+   "image_manifest_digest": "sha256:8256f411db60bbd4b10803641bccf24e3df67ed73cb4133ef12565791f2314e3",
+   "config_digest": "sha256:20582c0764307f5b779c2b96284d1ed3850d017f1decd67b27b5a3a97f34fcdf",
+   "image": "readystack/rabbitmq:4.4.1-CE-ubuntu24.04-r2"
+  },
+  "checksummed_files": 12399
+ },
+ "files": [
+  {
+   "path": "BASES.tsv",
+   "size": 262,
+   "sha256": "c74d67688b6c48929450c3d8707c9b162330e8ed3c6d8eedde41f239185b20f2",
+   "lines": 2,
+   "public": "full"
+  },
+  {
+   "path": "BUILD_OFFLINE.sh",
+   "size": 8856,
+   "sha256": "6ab4f08a6ec775b32d854f03413b30ecfe555ddba78cf0de956235f5a2a39542",
+   "lines": 162,
+   "public": "preview",
+   "preview_lines": 24
+  },
+  {
+   "path": "CHECKSUMS.sha256",
+   "size": 1877658,
+   "sha256": "e4c3273277753e1f075a687c33d8e2cd4aa595eb5ac85598db94e83bcc30bbb5",
+   "lines": 12399,
+   "public": "account",
+   "stored": "gzip"
+  },
+  {
+   "path": "DOCKERFILE_NAME.txt",
+   "size": 26,
+   "sha256": "9aadd1ede68e016a6f163c97befc5ff2fcdc8ebd4f84b108dba63cb195fa8c84",
+   "lines": 1,
+   "public": "full"
+  },
+  {
+   "path": "Dockerfile",
+   "size": 9717,
+   "sha256": "81e69b7ea0a39b847c8d22983e97598a8a5223a55c8394f6126c3f9d49c8477f",
+   "lines": 119,
+   "public": "account"
+  },
+  {
+   "path": "Dockerfile.offline",
+   "size": 9717,
+   "sha256": "81e69b7ea0a39b847c8d22983e97598a8a5223a55c8394f6126c3f9d49c8477f",
+   "lines": 119,
+   "public": "account"
+  },
+  {
+   "path": "Dockerfile.offline.pinned",
+   "size": 9717,
+   "sha256": "81e69b7ea0a39b847c8d22983e97598a8a5223a55c8394f6126c3f9d49c8477f",
+   "lines": 119,
+   "public": "preview",
+   "preview_lines": 24
+  },
+  {
+   "path": "Dockerfile.vendor",
+   "size": 7851,
+   "sha256": "ff94201569cbe6d17ebb203e12e366960776146439540baddf540b06256b1aaf",
+   "lines": 68,
+   "public": "account"
+  },
+  {
+   "path": "FILE_MODES.tsv",
+   "size": 1234524,
+   "sha256": "ce5be8ce41d8989b358c580c500053b154083bdee68f93da60b004a7d8f88b9a",
+   "lines": 14383,
+   "public": "account",
+   "stored": "gzip"
+  },
+  {
+   "path": "MANIFEST.txt",
+   "size": 1034556,
+   "sha256": "37b48a8c06f897992fb3845d97d8fd6f6694701f64a75b866e93b8734d195218",
+   "lines": 12401,
+   "public": "account",
+   "stored": "gzip"
+  },
+  {
+   "path": "README.md",
+   "size": 3338,
+   "sha256": "808c7646263049b369f56bde1156806d7a866cc5950e1585586eb28d764698bc",
+   "lines": 40,
+   "public": "account"
+  },
+  {
+   "path": "SOURCE_DATE_EPOCH.txt",
+   "size": 11,
+   "sha256": "24026142629729cf0d8602342df2b0ff18970a1622913b9d20cf5545bcdcea91",
+   "lines": 1,
+   "public": "full"
+  },
+  {
+   "path": "TARGET_DIGEST.txt",
+   "size": 283,
+   "sha256": "23080ad993ff77029bcdcb0b211a70a375b02afedb291cc5acadabaa9869fa31",
+   "lines": 6,
+   "public": "full"
+  },
+  {
+   "path": "TRADEMARK.md",
+   "size": 606,
+   "sha256": "8a0afd139bf5878b58997ddc018fac0c3ee1156f179db062c19fcf5ac1169560",
+   "lines": 13,
+   "public": "account"
+  },
+  {
+   "path": "VERIFY_OFFLINE.sh",
+   "size": 10153,
+   "sha256": "3e8184ea230cfd8f41f977e26be6bf7bd03112c396c517837ce0c7de4f7399dd",
+   "lines": 165,
+   "public": "account"
+  },
+  {
+   "path": "docs/PROVENANCE.md",
+   "size": 2666,
+   "sha256": "42e7b56d6c458587692a35c5bf107b420ee6af9d143feb44ebc5831f1f11693a",
+   "lines": 36,
+   "public": "account"
+  },
+  {
+   "path": "docs/REBUILD.md",
+   "size": 6092,
+   "sha256": "d6ec993d8e3a106e67f66df79cb49b63071f803b9a4c62211d6639cc65e46cc3",
+   "lines": 60,
+   "public": "account"
+  },
+  {
+   "path": "docs/VERIFY.md",
+   "size": 2029,
+   "sha256": "ebef4158bb6143ae5239846c02e497c6c8227ff9d050ed50476595139d4bc2f8",
+   "lines": 34,
+   "public": "account"
+  },
+  {
+   "path": "docs/provenance/BASE_IMAGE_DIGESTS.lock",
+   "size": 63,
+   "sha256": "1906b2aa4352d68cf9549ba3ae29abf90d6e2bc9e6efbc9446748c3a905536b5",
+   "lines": 2,
+   "public": "full"
+  },
+  {
+   "path": "docs/provenance/BUILD_RECIPE.json",
+   "size": 8071,
+   "sha256": "08f67c28b8d71069dce73ec16689243b2b097cb62dd1ce96fb5872edacde86d5",
+   "lines": 137,
+   "public": "account"
+  },
+  {
+   "path": "docs/provenance/CUSTODY_INPUTS.json",
+   "size": 657,
+   "sha256": "f14f49c7ad48d1e08ecf515c53a783752d558b24aeadce44676dd343225eb408",
+   "lines": 17,
+   "public": "account"
+  },
+  {
+   "path": "docs/provenance/SOURCE_FILE_MANIFEST.json",
+   "size": 228119,
+   "sha256": "5f1f501987af8d93331e2972fbb3bf41d76192d296128f2b99c2e64a2e7d5bd2",
+   "lines": 3734,
+   "public": "account"
+  },
+  {
+   "path": "docs/provenance/SOURCE_TREE_HASH.json",
+   "size": 315,
+   "sha256": "e2a05548f2371173fe6fc3785cd9a295fb5776029ef15757feebc1cd5b13ef91",
+   "lines": 9,
+   "public": "full"
+  },
+  {
+   "path": "docs/provenance/SYSTEM_PINNING.lock",
+   "size": 762,
+   "sha256": "dfab9bd42f93a1cdf1bbc29b24cdf8738bf97801bf4a72fede4e718c8943f755",
+   "lines": 24,
+   "public": "account"
+  },
+  {
+   "path": "docs/provenance/TOOLCHAIN.lock",
+   "size": 4603,
+   "sha256": "fb4fa5e890edc3eef94c20687918423c7c565cb21eb1da1dcfb0776b4fd61857",
+   "lines": 143,
+   "public": "account"
+  },
+  {
+   "path": "kitforge-7z",
+   "size": 569,
+   "sha256": "ce8e4a1bf6d448711fab4b0de4b03a55238a08ad3419bc1c86124c73fdb3395f",
+   "lines": 11,
+   "public": "account"
+  },
+  {
+   "path": "kitforge-zip-sde",
+   "size": 5410,
+   "sha256": "5cecc12182a6e6b4101f4610a49357e2ad5bf899a498b8e4db061dfcd220f5d6",
+   "lines": 115,
+   "public": "account"
+  },
+  {
+   "path": "rebuild.json",
+   "size": 1436,
+   "sha256": "ee43d07a7aede9abc4ac08684880d9013ec8f018b75b0ca7951236c1ecc7d7a4",
+   "lines": 38,
+   "public": "account"
+  },
+  {
+   "path": "rs-probe.go",
+   "size": 3179,
+   "sha256": "a8bdee17a3581f8685f58d7a8ccb7524153829f70b19c9d75e323c589de2ad8f",
+   "lines": 117,
+   "public": "account"
+  },
+  {
+   "path": "rs-probe.mod",
+   "size": 40,
+   "sha256": "a480b79acf98e4275725058076ad2a8684a2eee06c27f4337b75339c198ca92d",
+   "lines": 3,
+   "public": "account"
+  },
+  {
+   "path": "scaffold_0_enabled_plugins",
+   "size": 43,
+   "sha256": "a63f0dd4e9181c82af9ad191df89429da0b761517e4a05570a0c67de4c0c1c2d",
+   "lines": 1,
+   "public": "account"
+  },
+  {
+   "path": "scaffold_1_10-defaults.conf",
+   "size": 146,
+   "sha256": "6d1ccc07336da9e9d28deedaeeebcf9f5b612b34f2142e5d7b2f1950cc6d0e7d",
+   "lines": 3,
+   "public": "account"
+  },
+  {
+   "path": "toolchain/BUILDKIT_TAG.txt",
+   "size": 22,
+   "sha256": "fcd530eeb02b063d2f047adad6eef896422a8e8d558513e5f09b2a262be32573",
+   "lines": 1,
+   "public": "full"
+  }
+ ],
+ "skipped": [],
+ "kit_adds": {
+  "bases": {
+   "files": 16,
+   "bytes": 330407104
+  },
+  "docs": {
+   "files": 3692,
+   "bytes": 64193607
+  },
+  "toolchain": {
+   "files": 1,
+   "bytes": 111529472
+  },
+  "vendored": {
+   "files": 8659,
+   "bytes": 390279003
+  }
+ },
+ "redacted_files": 0
+}

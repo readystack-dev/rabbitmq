@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""kitforge-zip-sde -- written by gen_dockerfile.py (L-009 Erlang kit).
+
+An escript is a header (#!, comment, emulator args) followed by a zip archive. OTP's zip module stamps every entry it
+is given as {Name, Binary} (rebar and rebar3 escriptize, mix escript.build, escript:create) with the build's clock
+time, so two builds of the same tree differ in every entry's time fields. For every escript and .ez archive under
+the given directories this sets each entry's DOS time and its extended-timestamp (0x5455), NTFS (0x000a) and old
+Info-ZIP Unix (0x5855) time fields, in the local headers and the central directory, to SOURCE_DATE_EPOCH. Names,
+order, contents, compression and CRCs are not touched; a file that is already normalized is left as it is."""
+import os
+import struct
+import sys
+import urllib.parse
+import time
+
+NTFS_EPOCH_OFFSET = 11644473600  # seconds from 1601-01-01 to 1970-01-01
+
+
+def dos_time_date(sde):
+    y, mo, d, h, mi, s = time.gmtime(sde)[:6]
+    if y < 1980:
+        y, mo, d, h, mi, s = 1980, 1, 1, 0, 0, 0
+    return (h << 11) | (mi << 5) | (s // 2), ((y - 1980) << 9) | (mo << 5) | d
+
+
+def patch_extra(buf, start, length, sde, filetime):
+    p, end = start, start + length
+    while p + 4 <= end:
+        hid, size = struct.unpack_from("<HH", buf, p)
+        d = p + 4
+        if d + size > end:
+            raise ValueError(f"extra field 0x{hid:04x} at byte {p} runs past its entry")
+        if hid == 0x5455 and size >= 1:  # flags, then the mtime/atime/ctime the flags announce (4 bytes each)
+            for i in range(min(bin(buf[d] & 7).count("1"), (size - 1) // 4)):
+                struct.pack_into("<I", buf, d + 1 + 4 * i, sde)
+        elif hid == 0x000A and size >= 4:  # reserved(4), then tag/size attributes; tag 1 holds mtime, atime, ctime
+            q = d + 4
+            while q + 4 <= d + size:
+                tag, tsize = struct.unpack_from("<HH", buf, q)
+                if tag == 1 and tsize >= 24 and q + 28 <= d + size:
+                    struct.pack_into("<QQQ", buf, q + 4, filetime, filetime, filetime)
+                q += 4 + tsize
+        elif hid == 0x5855 and size >= 8:  # atime, mtime (then uid/gid in a local header)
+            struct.pack_into("<II", buf, d, sde, sde)
+        p = d + size
+
+
+def normalize(buf, sde):
+    """Set every entry's times in the zip at the end of buf to sde. The entry count, or None when buf ends in no zip."""
+    e = buf.rfind(b"PK\x05\x06", max(0, len(buf) - 65557))
+    if e < 0 or e + 22 > len(buf):
+        return None
+    n_disk, n, cd_size, cd_off, comment_len = struct.unpack_from("<HHIIH", buf, e + 8)
+    if e + 22 + comment_len != len(buf):
+        return None
+    if 0xFFFF in (n, n_disk) or 0xFFFFFFFF in (cd_size, cd_off):
+        raise ValueError("zip64 archive (not normalized)")
+    cd = e - cd_size
+    base = cd - cd_off  # bytes before the archive: the escript header
+    if base < 0 or (n and buf[cd:cd + 4] != b"PK\x01\x02"):
+        return None
+    t, d = dos_time_date(sde)
+    filetime = (sde + NTFS_EPOCH_OFFSET) * 10_000_000
+    p = cd
+    for i in range(n):
+        if buf[p:p + 4] != b"PK\x01\x02":
+            raise ValueError(f"central directory entry {i} at byte {p} has no signature")
+        name_len, extra_len, comment_len = struct.unpack_from("<HHH", buf, p + 28)
+        lh = base + struct.unpack_from("<I", buf, p + 42)[0]
+        if buf[lh:lh + 4] != b"PK\x03\x04":
+            raise ValueError(f"local header of entry {i} at byte {lh} has no signature")
+        struct.pack_into("<HH", buf, p + 12, t, d)
+        patch_extra(buf, p + 46 + name_len, extra_len, sde, filetime)
+        struct.pack_into("<HH", buf, lh + 10, t, d)
+        lname_len, lextra_len = struct.unpack_from("<HH", buf, lh + 26)
+        patch_extra(buf, lh + 30 + lname_len, lextra_len, sde, filetime)
+        p += 46 + name_len + extra_len + comment_len
+    return n
+
+
+def main(dirs):
+    sde = os.environ.get("SOURCE_DATE_EPOCH", "")
+    if not sde.isdigit() or int(sde) > 0xFFFFFFFF:
+        sys.exit(f"kitforge-zip-sde: SOURCE_DATE_EPOCH must be set to a 32-bit epoch (got {sde!r})")
+    sde = int(sde)
+    for top in dirs:
+        if not os.path.isdir(top):
+            sys.exit(f"kitforge-zip-sde: {top} is not a directory")
+        for root, subdirs, files in os.walk(top):
+            subdirs.sort()
+            for name in sorted(files):
+                path = os.path.join(root, name)
+                if os.path.islink(path) or not os.path.isfile(path):
+                    continue
+                with open(path, "rb") as fh:
+                    if fh.read(2) != b"#!" and not name.endswith(".ez"):
+                        continue
+                    fh.seek(0)
+                    old = fh.read()
+                buf = bytearray(old)
+                try:
+                    n = normalize(buf, sde)
+                except (ValueError, struct.error) as ex:
+                    sys.exit(f"kitforge-zip-sde: {path}: {ex}")
+                if n is None:
+                    continue
+                if buf != old:
+                    with open(path, "r+b") as fh:
+                        fh.write(buf)
+                print(f"kitforge-zip-sde: {path}: {n} entries " + ("set to SOURCE_DATE_EPOCH" if buf != old
+                                                                      else "already at SOURCE_DATE_EPOCH"))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

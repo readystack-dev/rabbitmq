@@ -1,0 +1,137 @@
+{
+  "schema": "kitforge.build_recipe.v1",
+  "slug": "rabbitmq",
+  "image": "readystack/rabbitmq:4.4.1-CE-ubuntu24.04-r2",
+  "build_method": "source-rebuild-erlang",
+  "source": {
+    "repo": "https://github.com/rabbitmq/rabbitmq-server",
+    "ref": "v4.4.1",
+    "project_version": "4.4.1",
+    "build_system": "erlang.mk + GNU make",
+    "builder_image": "elixir:1.20-otp-28-slim",
+    "offline_builder_image": "ubuntu:24.04",
+    "otp_version": "28",
+    "elixir_version": "1.20",
+    "otp_source": {
+      "version": "28.5.0.8",
+      "url": "https://github.com/erlang/otp/releases/download/OTP-28.5.0.8/otp_src_28.5.0.8.tar.gz",
+      "sha256": "8a696e15bcbe5d57197b1f4c03c92d415f9fd9af70f9222a05911c8a5463cba6",
+      "configure_flags": [
+        "--without-javac",
+        "--without-wx",
+        "--without-odbc",
+        "--disable-sctp",
+        "--enable-jit"
+      ]
+    },
+    "elixir_source": {
+      "version": "1.20.4",
+      "url": "https://github.com/elixir-lang/elixir/archive/v1.20.4.tar.gz",
+      "sha256": "2f87be1702583ecbeee82c0ad4d6353de96463cfa0fa6e7557e05f68d90da869"
+    },
+    "_otp_source_note": "OTP 28.5.0.8 (released 2026-10-14) and Elixir 1.20.4 are the newest 28.x / 1.20.x releases on 2026-10-22. sha256s: OTP = the GitHub release asset digest, equal to the release's SHA256.txt and to the official erlang:28 image's OTP_DOWNLOAD_SHA256; Elixir = the v1.20.4 source archive, equal to the official elixir:1.20 image's ELIXIR_DOWNLOAD_SHA256 (both checked 2026-10-22; the archive re-downloaded). configure_flags keep the OTP application set of erlang:28-slim, which r1 ran on, minus odbc and SCTP (their libraries are not installed and RabbitMQ uses neither) and the Java/wx GUI parts. To move to a newer OTP patch: update version/url/sha256 here (the renderer refuses a version that disagrees with otp_version, or a short sha256).",
+    "_toolchain_note": "RabbitMQ 4.4.x CI (test-make.yaml, v4.4.0) builds + tests against OTP {27,28,29} x Elixir 1.20; deps/rabbitmq_cli/mix.exs accepts Elixir >= 1.17 and < 1.21. We pick OTP 28 + Elixir 1.20: the Elixir upstream tests 4.4 with, and the OTP series 4.3.6-r1 already ran on (RabbitMQ's 4.4.0 notes advise against moving RabbitMQ to 4.4 and Erlang to a new series in one step; this release keeps the series). Since 2026-10-10 the image is Ubuntu 24.04: no official Erlang or Elixir image is built on Ubuntu, and noble's own packages are erlang 25.3 and elixir 1.14, below RabbitMQ 4.3's minimum, so the offline build compiles Erlang/OTP and Elixir from source (source.otp_source / elixir_source) on the pinned ubuntu:24.04 -- the recipe the official erlang and elixir images use on Debian (./configure && make && make install; Elixir `make install`) -- and OTP's crypto NIF links Ubuntu's libssl3t64. Elixir goes to /opt/elixir and stays in the build stage. The online vendor stage still uses the official elixir:1.20-otp-28-slim (Debian 13): `make source-dist` only fetches and bundles source. rabbitmq-components.mk sets ELIXIR=system, so the build stage's mix/elixirc (on PATH) is used. The official docker-library rabbitmq image is also ubuntu:24.04 with OTP compiled from source.",
+    "build_packages": [
+      "build-essential",
+      "make",
+      "git",
+      "ca-certificates",
+      "zip",
+      "unzip",
+      "p7zip-full",
+      "xz-utils",
+      "rsync",
+      "xsltproc",
+      "python3",
+      "perl",
+      "libssl-dev",
+      "libncurses-dev",
+      "zlib1g-dev"
+    ],
+    "_build_packages_note": "Erlang/OTP + Elixir + erlc/escript are compiled in the offline otpbuild stage from source; that build needs build-essential (gcc/g++ for erts and the JIT, make), perl (OTP's build scripts), libssl-dev (the crypto NIF, linked to Ubuntu's libssl3t64), libncurses-dev (erts termcap, libtinfo6) and zlib1g-dev (erts zlib). The rest is the host toolchain erlang.mk/the packaging Makefile invoke: make (build-essential->gcc/make), git (erlang.mk fetches deps + does git-describe versioning), zip/unzip + xz-utils (source-dist + generic-unix tarball pack/unpack), rsync (source-dist file assembly), xsltproc (the generic-unix `manpages`/`web-manpages` targets render docbook man pages -- omitting it breaks `make package-generic-unix`), python3 (a couple of plugin codegen scripts). ca-certificates for the git/https dep fetch in the ONLINE vendor stage only. The same list is installed in the online vendor stage (elixir:1.20-otp-28-slim, Debian 13) and vendored as build debs from the pinned ubuntu:24.04; every name exists on both (checked 2026-10-10).",
+    "vendor_cmd": "make source-dist PROJECT_VERSION=4.4.1",
+    "vendor_outputs": [
+      "deps/  (every erlang.mk dependency fetched in-tree -- the vendored dep set)",
+      "PACKAGES/rabbitmq-server-4.4.1.tar.xz  (self-contained source-dist tarball; all deps bundled)"
+    ],
+    "offline_build_cmd": "make package-generic-unix PROJECT_VERSION=4.4.1",
+    "offline_build_output": "PACKAGES/rabbitmq-server-generic-unix-4.4.1.tar.xz",
+    "install": {
+      "extract_to": "/opt/rabbitmq",
+      "strip_components": 1,
+      "post_extract_sed": "sed -i 's/^SYS_PREFIX=.*$/SYS_PREFIX=/' /opt/rabbitmq/sbin/rabbitmq-defaults",
+      "_note": "Mirrors packaging/docker-image/Dockerfile: extract the generic-unix release to /opt/rabbitmq --strip-components 1, then force SYS_PREFIX= empty so the broker reads config from /etc/rabbitmq (not /opt/rabbitmq/etc). PATH must include /opt/rabbitmq/sbin (rabbitmq-server, rabbitmqctl, rabbitmq-diagnostics, rabbitmq-plugins)."
+    },
+    "vendor_build": null,
+    "_offline_vendor_note": "HERMETIC/OFFLINE VENDOR GAP (highest risk): erlang.mk fetches deps via git during `make`. The ONLINE `make source-dist` must populate deps/ with EVERY dep (and bundle them into the source-dist tarball) so the OFFLINE `make package-generic-unix` recompiles with --network=none. erlang.mk will NOT refetch a dep that is already present in deps/, but the kit MUST ship the populated deps/ tree (not just the tarball) and may need IGNORE_DEPS / DEPS_DIR set so no git is attempted offline. This is the source-rebuild-erlang analog of the etcd per-module `go mod vendor` gap -- prove the --network=none build before certifying.",
+    "source_date_epoch": 1795161207,
+    "source_date_epoch_provenance": "the time release 4.4.1-CE-ubuntu24.04-r2 was cut (2026-11-20T07:53:27Z), by scripts/retarget.py --rev-bump: ReadyStack dates an image by when its release was packaged (owner 2026-11-10), recorded here once and used by every rebuild of the release; it builds upstream commit aa914c53d2f4, dated 2026-11-16T19:00:05Z (source.commit_epoch).",
+    "commit": "aa914c53d2f40f4be3d3a8738d0d5018ea1537e4",
+    "source_date_epoch_basis": "release-cut",
+    "commit_epoch": 1794855605
+  },
+  "binaries_from_source": null,
+  "runtime_packages": [
+    "base-files",
+    "base-passwd",
+    "ca-certificates",
+    "coreutils",
+    "dash",
+    "gcc-14-base",
+    "libacl1",
+    "libattr1",
+    "libc-bin",
+    "libc6",
+    "libcap2",
+    "libcrypt1",
+    "libgcc-s1",
+    "libgmp10",
+    "libpcre2-8-0",
+    "libselinux1",
+    "libssl3t64",
+    "libstdc++6",
+    "libtinfo6",
+    "openssl",
+    "tar",
+    "tzdata",
+    "zlib1g"
+  ],
+  "runtime_base": {
+    "kind": "chisel",
+    "shell": true,
+    "tools": [
+      "coreutils",
+      "tar"
+    ],
+    "slices": [
+      "libssl3t64_libs",
+      "libtinfo6_libs",
+      "zlib1g_libs",
+      "libstdc++6_libs",
+      "libgcc-s1_libs",
+      "libc-bin_locale"
+    ],
+    "provides": [
+      "rabbitmq-server",
+      "rabbitmqctl",
+      "rabbitmq-diagnostics",
+      "rabbitmq-plugins",
+      "rabbitmq-queues",
+      "rabbitmq-streams",
+      "rabbitmq-upgrade",
+      "rabbitmq-env",
+      "rabbitmq-defaults",
+      "erl",
+      "erlc",
+      "epmd",
+      "escript",
+      "run_erl",
+      "to_erl"
+    ],
+    "rootfs_run": [
+      "chown -R 999:999 \"$ROOT/var/lib/rabbitmq\" \"$ROOT/etc/rabbitmq\" \"$ROOT/var/log/rabbitmq\" \"$ROOT/opt/rabbitmq\"",
+      "chmod 0750 \"$ROOT/var/lib/rabbitmq\""
+    ],
+    "packages": "vendored/chisel/packages.tsv"
+  }
+}

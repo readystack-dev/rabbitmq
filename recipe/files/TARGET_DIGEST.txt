@@ -1,0 +1,6 @@
+image_manifest_digest=sha256:8256f411db60bbd4b10803641bccf24e3df67ed73cb4133ef12565791f2314e3
+config_digest=sha256:20582c0764307f5b779c2b96284d1ed3850d017f1decd67b27b5a3a97f34fcdf
+tag=readystack/rabbitmq:4.4.1-CE-ubuntu24.04-r2
+probe_port=15692
+probe_path=/metrics
+probe_timeout=180

@@ -1,0 +1,143 @@
+{
+  "apt_refresh": [
+    {
+      "min_version": "10.42-4ubuntu2.2",
+      "package": "libpcre2-8-0",
+      "reason": "UBUNTU-CVE-2026-103111, UBUNTU-CVE-2026-86145, UBUNTU-CVE-2026-89157, UBUNTU-CVE-2026-89161: libpcre2-8-0 10.42-4ubuntu2.1 -> 10.42-4ubuntu2.2"
+    },
+    {
+      "min_version": "2.39-0ubuntu8.12",
+      "package": "libc-bin",
+      "reason": "UBUNTU-CVE-2026-84243: libc-bin 2.39-0ubuntu8.9 -> 2.39-0ubuntu8.12"
+    },
+    {
+      "min_version": "2.39-0ubuntu8.12",
+      "package": "libc6",
+      "reason": "UBUNTU-CVE-2026-84243: libc6 2.39-0ubuntu8.9 -> 2.39-0ubuntu8.12"
+    }
+  ],
+  "build_method": "source-rebuild-erlang",
+  "chain_id": 1144,
+  "dep_bumps": [],
+  "expected_residuals": [],
+  "images": [
+    {
+      "digest": "sha256:a61672ebbafaf93ec6baeee14657fa73407e4f7fe57e92b2e3f063d25d0d3244",
+      "ref": "elixir:1.20-otp-28-slim",
+      "role": "builder"
+    },
+    {
+      "digest": "sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289",
+      "ref": "ubuntu:24.04",
+      "role": "offline_builder"
+    },
+    {
+      "digest": "sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289",
+      "ref": "ubuntu:24.04",
+      "role": "base"
+    }
+  ],
+  "mod_replaces": [],
+  "runtime_base": {
+    "kind": "chisel",
+    "provides": [
+      "rabbitmq-server",
+      "rabbitmqctl",
+      "rabbitmq-diagnostics",
+      "rabbitmq-plugins",
+      "rabbitmq-queues",
+      "rabbitmq-streams",
+      "rabbitmq-upgrade",
+      "rabbitmq-env",
+      "rabbitmq-defaults",
+      "erl",
+      "erlc",
+      "epmd",
+      "escript",
+      "run_erl",
+      "to_erl"
+    ],
+    "rootfs_run": [
+      "chown -R 999:999 \"$ROOT/var/lib/rabbitmq\" \"$ROOT/etc/rabbitmq\" \"$ROOT/var/log/rabbitmq\" \"$ROOT/opt/rabbitmq\"",
+      "chmod 0750 \"$ROOT/var/lib/rabbitmq\""
+    ],
+    "shell": true,
+    "slices": [
+      "libssl3t64_libs",
+      "libtinfo6_libs",
+      "zlib1g_libs",
+      "libstdc++6_libs",
+      "libgcc-s1_libs",
+      "libc-bin_locale"
+    ],
+    "tools": [
+      "coreutils",
+      "tar"
+    ]
+  },
+  "schema": "kitforge.toolchain_lock.v1",
+  "slug": "rabbitmq",
+  "source": {
+    "build_packages": [
+      "build-essential",
+      "make",
+      "git",
+      "ca-certificates",
+      "zip",
+      "unzip",
+      "p7zip-full",
+      "xz-utils",
+      "rsync",
+      "xsltproc",
+      "python3",
+      "perl",
+      "libssl-dev",
+      "libncurses-dev",
+      "zlib1g-dev"
+    ],
+    "build_system": "erlang.mk + GNU make",
+    "builder_image": "elixir:1.20-otp-28-slim",
+    "commit": "aa914c53d2f40f4be3d3a8738d0d5018ea1537e4",
+    "commit_epoch": 1794855605,
+    "elixir_source": {
+      "sha256": "2f87be1702583ecbeee82c0ad4d6353de96463cfa0fa6e7557e05f68d90da869",
+      "url": "https://github.com/elixir-lang/elixir/archive/v1.20.4.tar.gz",
+      "version": "1.20.4"
+    },
+    "elixir_version": "1.20",
+    "install": {
+      "extract_to": "/opt/rabbitmq",
+      "post_extract_sed": "sed -i 's/^SYS_PREFIX=.*$/SYS_PREFIX=/' /opt/rabbitmq/sbin/rabbitmq-defaults",
+      "strip_components": 1
+    },
+    "offline_build_cmd": "make package-generic-unix PROJECT_VERSION=4.4.1",
+    "offline_build_output": "PACKAGES/rabbitmq-server-generic-unix-4.4.1.tar.xz",
+    "offline_builder_image": "ubuntu:24.04",
+    "otp_source": {
+      "configure_flags": [
+        "--without-javac",
+        "--without-wx",
+        "--without-odbc",
+        "--disable-sctp",
+        "--enable-jit"
+      ],
+      "sha256": "8a696e15bcbe5d57197b1f4c03c92d415f9fd9af70f9222a05911c8a5463cba6",
+      "url": "https://github.com/erlang/otp/releases/download/OTP-28.5.0.8/otp_src_28.5.0.8.tar.gz",
+      "version": "28.5.0.8"
+    },
+    "otp_version": "28",
+    "project_version": "4.4.1",
+    "ref": "v4.4.1",
+    "repo": "https://github.com/rabbitmq/rabbitmq-server",
+    "source_date_epoch": 1795161207,
+    "source_date_epoch_basis": "release-cut",
+    "source_date_epoch_provenance": "the time release 4.4.1-CE-ubuntu24.04-r2 was cut (2026-11-20T07:53:27Z), by scripts/retarget.py --rev-bump: ReadyStack dates an image by when its release was packaged (owner 2026-11-10), recorded here once and used by every rebuild of the release; it builds upstream commit aa914c53d2f4, dated 2026-11-16T19:00:05Z (source.commit_epoch).",
+    "vendor_build": null,
+    "vendor_cmd": "make source-dist PROJECT_VERSION=4.4.1",
+    "vendor_outputs": [
+      "deps/  (every erlang.mk dependency fetched in-tree -- the vendored dep set)",
+      "PACKAGES/rabbitmq-server-4.4.1.tar.xz  (self-contained source-dist tarball; all deps bundled)"
+    ]
+  },
+  "version": "4.4.1"
+}

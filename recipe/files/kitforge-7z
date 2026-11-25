@@ -1,0 +1,11 @@
+#!/bin/sh
+# kitforge-7z -- written by gen_dockerfile.py (L-009 Erlang kit). erlang.mk builds escripts with
+# `7z a -tzip ... <zip> <files>`, and 7-Zip stamps each entry with its file's mtime, the compile time, so two
+# builds of the same tree differ in every escript entry. Set the files being archived to SOURCE_DATE_EPOCH first,
+# then run the real 7z unchanged.
+if [ "${1:-}" = a ] && [ -n "${SOURCE_DATE_EPOCH:-}" ]; then
+  for f in "$@"; do
+    case "$f" in a|-*) ;; *) [ -f "$f" ] && touch -h -d "@$SOURCE_DATE_EPOCH" "$f" ;; esac
+  done
+fi
+exec /usr/bin/7z "$@"

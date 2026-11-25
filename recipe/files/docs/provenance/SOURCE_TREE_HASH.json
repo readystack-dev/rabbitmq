@@ -1,0 +1,9 @@
+{
+  "schema": "kitforge.source_tree_hash.v1",
+  "slug": "rabbitmq",
+  "repo": "https://github.com/rabbitmq/rabbitmq-server",
+  "ref": "v4.4.1",
+  "commit": "aa914c53d2f40f4be3d3a8738d0d5018ea1537e4",
+  "tree_listing_sha256": "e8c52034fe5a90bae604a9185692261bfc80c4399f45cd764c63b273af1356c7",
+  "file_count": 3727
+}

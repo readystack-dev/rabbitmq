@@ -1,0 +1,2 @@
+# base images for rabbitmq (resolve at build_kit)
+ubuntu:24.04
